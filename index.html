@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image to Link - High Quality</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --bg: #f3f4f6;
+            --card: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: var(--card);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+        }
+
+        .upload-box {
+            border: 2px dashed #cbd5e1;
+            padding: 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 1.5rem;
+            transition: 0.3s;
+        }
+
+        .upload-box:hover { border-color: var(--primary); background: #f5f3ff; }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+        }
+
+        .result {
+            margin-top: 20px;
+            display: none;
+            text-align: left;
+        }
+
+        input {
+            width: 80%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #f9fafb;
+        }
+
+        .copy-btn {
+            padding: 8px 12px;
+            background: #10b981;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        #preview {
+            max-width: 100%;
+            margin-top: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Image to Link 🚀</h2>
+    <p style="color: #666; font-size: 14px;">আপনার ছবি আপলোড করে প্রফেশনাল URL পান</p>
+
+    <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+        <span id="fileName">ছবি সিলেক্ট করুন</span>
+        <input type="file" id="fileInput" hidden accept="image/*">
+    </div>
+
+    <button class="btn" onclick="uploadToCloudinary()">লিঙ্ক তৈরি করুন</button>
+
+    <div class="result" id="resultArea">
+        <p style="font-size: 13px; font-weight: bold; margin-bottom: 5px;">সরাসরি ইমেজ লিঙ্ক (img src):</p>
+        <div style="display: flex; gap: 5px;">
+            <input type="text" id="linkOutput" readonly>
+            <button class="copy-btn" onclick="copyLink()">Copy</button>
+        </div>
+        <img id="preview" src="">
+    </div>
+</div>
+
+<script>
+    // --- গুরুত্বপূর্ণ: এখানে আপনার ডাটা বসান ---
+    const CLOUD_NAME = "dwfnjvw6v"; 
+    const UPLOAD_PRESET = "UPLOAD_PRESET"; 
+
+    const fileInput = document.getElementById('fileInput');
+    fileInput.onchange = () => {
+        document.getElementById('fileName').innerText = fileInput.files[0].name;
+    };
+
+    async function uploadToCloudinary() {
+        const file = fileInput.files[0];
+        if (!file) return alert("দয়া করে ছবি সিলেক্ট করুন!");
+
+        const btn = document.querySelector('.btn');
+        btn.innerText = "আপলোড হচ্ছে...";
+        btn.disabled = true;
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', UPLOAD_PRESET);
+
+        try {
+            const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.secure_url) {
+                document.getElementById('resultArea').style.display = 'block';
+                document.getElementById('linkOutput').value = data.secure_url;
+                document.getElementById('preview').src = data.secure_url;
+                document.getElementById('preview').style.display = 'block';
+                alert("সফলভাবে লিঙ্ক তৈরি হয়েছে!");
+            }
+        } catch (err) {
+            alert("কিছু একটা ভুল হয়েছে!");
+        } finally {
+            btn.innerText = "লিঙ্ক তৈরি করুন";
+            btn.disabled = false;
+        }
+    }
+
+    function copyLink() {
+        const copyText = document.getElementById("linkOutput");
+        copyText.select();
+        document.execCommand("copy");
+        alert("লিঙ্কটি কপি হয়েছে!");
+    }
+</script>
+
+</body>
+</html>
+
